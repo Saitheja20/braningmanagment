@@ -221,14 +221,15 @@ final class Project
         return $columns;
     }
 
-    public static function createTask(array $data): int
+    public static function createTask(array $data, array $labelIds = []): int
     {
         $pdo = Database::connection();
+        $pdo->beginTransaction();
         $stmt = $pdo->prepare(
             'INSERT INTO tasks
-                (project_id, assigned_to, created_by, title, description, status, priority, start_date, due_date, sort_order)
+                (project_id, assigned_to, created_by, title, description, status, priority, estimated_hours, start_date, due_date, sort_order)
              VALUES
-                (:project_id, :assigned_to, :created_by, :title, :description, :status, :priority, :start_date, :due_date, :sort_order)'
+                (:project_id, :assigned_to, :created_by, :title, :description, :status, :priority, :estimated_hours, :start_date, :due_date, :sort_order)'
         );
         $stmt->execute([
             'project_id' => (int) $data['project_id'],
@@ -238,12 +239,35 @@ final class Project
             'description' => trim((string) ($data['description'] ?? '')) ?: null,
             'status' => in_array($data['status'] ?? 'todo', self::TASK_STATUSES, true) ? $data['status'] : 'todo',
             'priority' => in_array($data['priority'] ?? 'medium', self::PRIORITIES, true) ? $data['priority'] : 'medium',
+            'estimated_hours' => is_numeric($data['estimated_hours'] ?? null) ? (float) $data['estimated_hours'] : null,
             'start_date' => self::nullableDate($data['start_date'] ?? null),
             'due_date' => self::nullableDate($data['due_date'] ?? null),
             'sort_order' => (int) ($data['sort_order'] ?? 0),
         ]);
 
-        return (int) $pdo->lastInsertId();
+        $taskId = (int) $pdo->lastInsertId();
+
+        if ($labelIds) {
+            $stmt = $pdo->prepare('INSERT INTO task_label_map (task_id, label_id) VALUES (:task_id, :label_id)');
+            foreach (array_unique(array_filter(array_map('intval', $labelIds))) as $labelId) {
+                $stmt->execute(['task_id' => $taskId, 'label_id' => $labelId]);
+            }
+        }
+
+        if (self::nullableInt($data['assigned_to'] ?? null)) {
+            $stmt = $pdo->prepare(
+                'INSERT INTO notifications (user_id, type, title, body, action_url)
+                 VALUES (:user_id, "task.assigned", "Task assigned", :body, :action_url)'
+            );
+            $stmt->execute([
+                'user_id' => (int) $data['assigned_to'],
+                'body' => trim((string) $data['title']),
+                'action_url' => '/tasks/detail?id=' . $taskId,
+            ]);
+        }
+
+        $pdo->commit();
+        return $taskId;
     }
 
     public static function updateTaskStatus(int $id, string $status): bool

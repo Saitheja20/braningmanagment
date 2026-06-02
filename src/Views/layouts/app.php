@@ -34,10 +34,10 @@ $pageTitle = isset($title) ? e($title) . ' | ' . e(Config::get('APP_NAME', 'Bran
     <nav class="sidebar-nav">
       <a class="<?= $currentPath === '/dashboard' ? 'active' : '' ?>" href="/dashboard"><i class="bi bi-grid-1x2-fill"></i><span>Dashboard</span></a>
       <a class="<?= $currentPath === '/projects' ? 'active' : '' ?>" href="/projects"><i class="bi bi-kanban"></i><span>Projects</span></a>
-      <a class="<?= $currentPath === '/projects/kanban' ? 'active' : '' ?>" href="/projects/kanban"><i class="bi bi-check2-square"></i><span>Tasks</span></a>
-      <a href="#"><i class="bi bi-building"></i><span>Clients</span></a>
-      <a href="#"><i class="bi bi-people"></i><span>Employees</span></a>
-      <a href="#"><i class="bi bi-chat-left-text"></i><span>Messages</span></a>
+      <a class="<?= str_starts_with($currentPath, '/tasks') || $currentPath === '/projects/kanban' ? 'active' : '' ?>" href="/tasks"><i class="bi bi-check2-square"></i><span>Tasks</span></a>
+      <a class="<?= $currentPath === '/portal' ? 'active' : '' ?>" href="/portal"><i class="bi bi-building"></i><span>Client Portal</span></a>
+      <a class="<?= str_starts_with($currentPath, '/employees') ? 'active' : '' ?>" href="/employees"><i class="bi bi-people"></i><span>Employees</span></a>
+      <a class="<?= str_starts_with($currentPath, '/realtime') ? 'active' : '' ?>" href="/realtime"><i class="bi bi-chat-left-text"></i><span>Realtime</span></a>
       <a href="#"><i class="bi bi-folder2-open"></i><span>Files</span></a>
       <a href="#"><i class="bi bi-bar-chart"></i><span>Reports</span></a>
     </nav>

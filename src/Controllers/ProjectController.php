@@ -91,6 +91,7 @@ final class ProjectController
             'milestones' => Project::milestones(),
             'taskStatuses' => Project::TASK_STATUSES,
             'priorities' => Project::PRIORITIES,
+            'labels' => \App\Models\Task::labels(),
         ], 'layouts/app');
     }
 
@@ -118,12 +119,13 @@ final class ProjectController
             'description' => Request::input('description'),
             'status' => Request::input('status', 'todo'),
             'priority' => Request::input('priority', 'medium'),
+            'estimated_hours' => Request::input('estimated_hours'),
             'start_date' => Request::input('start_date'),
             'due_date' => Request::input('due_date'),
-        ]);
+        ], $_POST['label_ids'] ?? []);
 
         Session::flash('success', 'Task created.');
-        App::redirect('/projects/kanban');
+        App::redirect($this->taskRedirectPath());
     }
 
     public function taskStatus(): void
@@ -181,6 +183,12 @@ final class ProjectController
             Session::flash('error', 'Project name is required.');
             App::redirect('/projects');
         }
+    }
+
+    private function taskRedirectPath(): string
+    {
+        $path = (string) Request::input('redirect_to', '/projects/kanban');
+        return in_array($path, ['/tasks', '/projects/kanban'], true) ? $path : '/projects/kanban';
     }
 
     private function validateCsrf(): void

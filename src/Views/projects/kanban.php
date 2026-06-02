@@ -121,6 +121,7 @@ $projectOptions = array_map(fn ($project) => [
   <div class="modal-dialog modal-lg modal-dialog-centered">
     <form class="modal-content" method="post" action="/tasks/store">
       <?= Csrf::field() ?>
+      <input type="hidden" name="redirect_to" value="/projects/kanban">
       <div class="modal-header">
         <div>
           <p class="eyebrow mb-1">Task management</p>
@@ -173,8 +174,20 @@ $projectOptions = array_map(fn ($project) => [
             </select>
           </div>
           <div class="col-md-3">
+            <label class="form-label" for="task_estimated_hours">Estimated hours</label>
+            <input class="form-control" id="task_estimated_hours" name="estimated_hours" type="number" min="0" step="0.25">
+          </div>
+          <div class="col-md-3">
             <label class="form-label" for="task_due_date">Due date</label>
             <input class="form-control" id="task_due_date" name="due_date" type="date">
+          </div>
+          <div class="col-md-9">
+            <label class="form-label" for="task_label_ids">Labels</label>
+            <select class="form-select" id="task_label_ids" name="label_ids[]" multiple size="3">
+              <?php foreach ($labels as $label): ?>
+                <option value="<?= e($label['id']) ?>"><?= e($label['name']) ?></option>
+              <?php endforeach; ?>
+            </select>
           </div>
         </div>
       </div>

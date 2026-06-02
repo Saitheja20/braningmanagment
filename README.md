@@ -151,3 +151,121 @@ Main files:
 - `database/migrations/002_project_management_schema.sql`
 
 Core MySQL operations are implemented in `src/Models/Project.php`, including project CRUD queries, member sync queries, task status updates, milestone inserts, deadline lists, and dashboard statistics.
+
+## Phase 6 Task Management
+
+The protected Task Management module is available after login:
+
+- `/tasks`
+- `/tasks/detail?id={task_id}`
+- `/projects/kanban`
+
+Implemented:
+
+- Task assignment
+- Priority and status updates through AJAX
+- Due dates and estimated hours
+- Labels through `task_labels` and `task_label_map`
+- File attachments stored under `storage/uploads/tasks/{task_id}`
+- Comments through AJAX
+- Checklist creation and completion toggles through AJAX
+- Checklist-based progress tracking
+- Assignment/comment/attachment notification inserts
+- Responsive Bootstrap workbench and detail UI
+
+Import the Phase 6 migration after Phase 5:
+
+```bash
+mysql -u root -p branding_pm < database/migrations/003_task_management_schema.sql
+```
+
+Main files:
+
+- `src/Controllers/TaskController.php`
+- `src/Models/Task.php`
+- `src/Views/tasks/index.php`
+- `src/Views/tasks/detail.php`
+- `src/Views/tasks/task-modal.php`
+- `public/assets/js/project-management.js`
+- `database/migrations/003_task_management_schema.sql`
+
+Core database operations are implemented in `src/Models/Task.php`, including task queries, label sync, comment inserts, checklist progress recalculation, attachment metadata inserts, and notification creation.
+
+## Phase 8 Employee Management
+
+Routes:
+
+- `/employees`
+- `/employees/detail?id={employee_id}`
+
+Implemented:
+
+- Employee profiles
+- Attendance tracking
+- Assigned task overview
+- Work logs
+- Productivity analytics widgets
+- Employee directory UI
+
+## Phase 9 Real-Time Features
+
+Routes:
+
+- `/realtime`
+- `/api/realtime/snapshot`
+- `/api/realtime/message`
+- `/api/notifications/read`
+
+Implemented:
+
+- AJAX notification polling
+- Internal chat
+- Live task update stream
+- Activity feed
+- Notification read endpoint
+- Real-time UI refresh every 10 seconds
+
+## Phase 10 Client Portal
+
+Routes:
+
+- `/portal`
+- `/portal/approval`
+- `/portal/feedback`
+- `/portal/file`
+
+Implemented:
+
+- Secure role-protected portal access
+- Client-scoped project progress
+- Design approval/rejection workflow
+- Client feedback messaging
+- Client file download access checks
+- Invoice visibility
+
+## Phase 11 Production Optimization
+
+Added:
+
+- Hardened `public/.htaccess`
+- Root `.htaccess` denial if the wrong web root is used
+- `storage/.htaccess` denial
+- Security headers middleware
+- Central error logging to `storage/logs/app.log`
+- Upload extension, size, and MIME validation
+- File cache utility in `src/Core/Cache.php`
+- Backup strategy document
+- Deployment checklist
+- Production folder structure guide
+
+Import the Phase 8-11 migration after Phase 6:
+
+```bash
+mysql -u root -p branding_pm < database/migrations/004_employee_realtime_client_production.sql
+```
+
+Production docs:
+
+- `docs/deployment-checklist.md`
+- `docs/backup-strategy.md`
+- `docs/production-folder-structure.md`
