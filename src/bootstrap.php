@@ -2,34 +2,92 @@
 
 declare(strict_types=1);
 
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+
+/*
+|--------------------------------------------------------------------------
+| ROOT PATH
+|--------------------------------------------------------------------------
+*/
+
+define('ROOT_PATH', dirname(__DIR__) . '/');
+
+/*
+|--------------------------------------------------------------------------
+| AUTOLOADER
+|--------------------------------------------------------------------------
+*/
+
 spl_autoload_register(function (string $class): void {
+
     $prefix = 'App\\';
-    $baseDir = __DIR__ . '/';
+    $baseDir = ROOT_PATH . 'src/';
 
     if (strncmp($prefix, $class, strlen($prefix)) !== 0) {
         return;
     }
 
     $relativeClass = substr($class, strlen($prefix));
+
     $file = $baseDir . str_replace('\\', '/', $relativeClass) . '.php';
 
-    if (is_file($file)) {
+    if (file_exists($file)) {
         require $file;
+    } else {
+        die("Autoload Error: {$file}");
     }
 });
 
-require __DIR__ . '/Helpers/functions.php';
+/*
+|--------------------------------------------------------------------------
+| HELPERS
+|--------------------------------------------------------------------------
+*/
 
-App\Core\Config::load(dirname(__DIR__) . '/.env');
-App\Middleware\SecurityMiddleware::headers();
-set_exception_handler(function (Throwable $exception): void {
-    App\Core\Logger::error($exception);
-    if (App\Core\Config::bool('APP_DEBUG')) {
-        http_response_code(500);
-        echo '<pre>' . e($exception->getMessage()) . '</pre>';
-        exit;
-    }
-    App\Core\App::abort(500, 'A server error occurred.');
-});
-App\Core\Session::start();
-App\Services\AuthService::bootRememberedUser();
+$helperPath = ROOT_PATH . 'src/Helpers/functions.php';
+
+if (file_exists($helperPath)) {
+    require $helperPath;
+}
+
+/*
+|--------------------------------------------------------------------------
+| CONFIG
+|--------------------------------------------------------------------------
+*/
+
+if (class_exists('App\Core\Config')) {
+    App\Core\Config::load(ROOT_PATH . '.env');
+}
+
+/*
+|--------------------------------------------------------------------------
+| SECURITY
+|--------------------------------------------------------------------------
+*/
+
+if (class_exists('App\Middleware\SecurityMiddleware')) {
+    App\Middleware\SecurityMiddleware::headers();
+}
+
+/*
+|--------------------------------------------------------------------------
+| SESSION
+|--------------------------------------------------------------------------
+*/
+
+if (class_exists('App\Core\Session')) {
+    App\Core\Session::start();
+}
+
+/*
+|--------------------------------------------------------------------------
+| AUTH
+|--------------------------------------------------------------------------
+*/
+
+if (class_exists('App\Services\AuthService')) {
+    App\Services\AuthService::bootRememberedUser();
+}
